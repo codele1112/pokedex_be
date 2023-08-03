@@ -18,7 +18,7 @@ router.get("/", (req, res, next) => {
   const { body, params, url, query } = req;
   console.log({ body, params, url, query });
 
-  const allowedFilter = ["name", "types", "id", "search"];
+  const allowedFilter = ["name", "type", "id", "search"];
   try {
     let { page, limit, ...filterQuery } = req.query;
     console.log("filterQuery:", filterQuery);
@@ -44,11 +44,11 @@ router.get("/", (req, res, next) => {
 
     let result = [];
     if (filterKeys.length) {
-      if (filterQuery.types) {
-        const searchQuery = filterQuery.types.toLowerCase();
+      if (filterQuery.type) {
+        const searchQuery = filterQuery.type.toLowerCase();
         // console.log("searchQuery:", searchQuery);
 
-        result = data.filter((pokemon) => pokemon.types.includes(searchQuery));
+        result = data.filter((pokemon) => pokemon.type.includes(searchQuery));
       }
       if (filterQuery.search) {
         let searchQuery = filterQuery.search.toLowerCase();

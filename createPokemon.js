@@ -19,7 +19,7 @@ const createPokemon = async () => {
       return {
         id: (index + 1).toString(),
         name: e.Name,
-        types: [e.Type1, e.Type2]
+        type: [e.Type1, e.Type2]
           .filter(Boolean)
           .map((type) => type.toLowerCase()),
         url: "http://localhost:5000/images/" + e.Name + ".png",
