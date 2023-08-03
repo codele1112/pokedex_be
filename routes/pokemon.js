@@ -27,7 +27,7 @@ router.get("/", (req, res, next) => {
     limit = parseInt(limit) || 50;
     //allow name,limit and page query string only
     const filterKeys = Object.keys(filterQuery);
-    console.log("filterKeys:", filterKeys);
+    // console.log("filterKeys:", filterKeys);
 
     filterKeys.forEach((key) => {
       if (!allowedFilter.includes(key)) {
@@ -50,8 +50,8 @@ router.get("/", (req, res, next) => {
 
         result = data.filter((pokemon) => pokemon.types.includes(searchQuery));
       }
-      if (filterQuery.name) {
-        let searchQuery = filterQuery.name.toLowerCase();
+      if (filterQuery.search) {
+        let searchQuery = filterQuery.search.toLowerCase();
         // console.log("searchQuery type", typeof searchQuery);
         result = data.filter((pokemon) => {
           return pokemon.name.includes(searchQuery);
