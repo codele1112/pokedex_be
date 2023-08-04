@@ -10,7 +10,9 @@ let rootDir = path.resolve(__dirname);
 const absolutePath = resolve("./pokemon.json");
 let db = fs.readFileSync(absolutePath, "utf-8");
 db = JSON.parse(db);
-const { data } = db;
+// console.log(db);
+const data = db;
+console.log(data);
 /* GET all data, filter by name, types */
 
 router.get("/", (req, res, next) => {
