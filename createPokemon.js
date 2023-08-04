@@ -28,11 +28,13 @@ const createPokemon = async () => {
     .filter((e) => e.name);
 
   let data = JSON.parse(fs.readFileSync("pokemon.json"));
+  data.count = newData.length;
   data.data = newData;
+  data.totalPokemons = newData.length;
 
   fs.writeFileSync("pokemon.json", JSON.stringify(data));
+  console.log(data);
 
-  console.log(newData);
   console.log("done");
 };
 
