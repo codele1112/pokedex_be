@@ -60,7 +60,7 @@ router.get("/", (req, res, next) => {
       totalPokemons: db.pokemons.length,
     };
 
-    res.status(200).send({ data });
+    res.status(200).send(data);
   } catch (error) {
     next(error);
   }
