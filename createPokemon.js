@@ -22,7 +22,7 @@ const createPokemon = async () => {
         types: [e.Type1, e.Type2]
           .filter(Boolean)
           .map((type) => type.toLowerCase()),
-        url: "http://localhost:5000/images/" + e.Name + ".png",
+        url: "http://localhost:8000/images/" + e.Name + ".png",
       };
     })
     .filter((e) => e.name);
