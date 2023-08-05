@@ -87,7 +87,7 @@ router.get("/:id", (req, res, next) => {
     }
 
     const lastIndex = db.pokemons.length - 1;
-    let prevIndex = targetIndex - 1;
+    let previousIndex = targetIndex - 1;
     let nextIndex = targetIndex + 1;
 
     if (targetIndex === lastIndex) {
@@ -98,11 +98,11 @@ router.get("/:id", (req, res, next) => {
     }
     let data = db.pokemons;
     const pokemon = data[targetIndex];
-    const prevPokemon = data[prevIndex];
+    const previousPokemon = data[previousIndex];
     const nextPokemon = data[nextIndex];
 
     result = {
-      prevPokemon,
+      previousPokemon,
       pokemon,
       nextPokemon,
     };
