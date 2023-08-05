@@ -54,7 +54,12 @@ router.get("/", (req, res, next) => {
       }
     }
 
-    data = db.pokemons.slice(offset, offset + limit);
+    data = {
+      count: db.pokemons.length,
+      pokemons: db.pokemons.slice(offset, offset + limit),
+      totalPokemons: db.pokemons.length,
+    };
+
     res.status(200).send({ data });
   } catch (error) {
     next(error);
