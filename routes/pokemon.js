@@ -10,9 +10,11 @@ const absolutePath = resolve("./pokemon.json");
 let db = fs.readFileSync(absolutePath, "utf-8");
 db = JSON.parse(db);
 // let { data } = db;
+console.log("data db", db.pokemons);
 
 /* GET all data, filter by name, types */
-
+var data = {};
+var result = [];
 router.get("/", (req, res, next) => {
   const { body, params, url, query } = req;
   console.log({ body, params, url, query });
@@ -37,27 +39,27 @@ router.get("/", (req, res, next) => {
     // //processing logic
     //Number of items skip for selection
     let offset = limit * (page - 1);
-
     if (filterKeys.length) {
       if (filterQuery.type) {
-        const searchQuery = filterQuery.type.toLowerCase();
-
-        db.pokemons = db.pokemons.filter((pokemon) => {
-          return pokemon.types.includes(searchQuery);
-        });
+        let searchQuery = filterQuery.type.toLowerCase();
+        result = db.pokemons.filter((pokemon) =>
+          pokemon.types.includes(searchQuery)
+        );
       }
       if (filterQuery.search) {
         let searchQuery = filterQuery.search.toLowerCase();
-        db.pokemons = db.pokemons.filter((pokemon) => {
-          return pokemon.name.includes(searchQuery);
-        });
+        result = db.pokemons.filter((pokemon) =>
+          pokemon.name.includes(searchQuery)
+        );
       }
+    } else {
+      result = db.pokemons;
     }
 
     data = {
-      count: db.pokemons.length,
-      pokemons: db.pokemons.slice(offset, offset + limit),
-      totalPokemons: db.pokemons.length,
+      count: result.length,
+      data: result.slice(offset, offset + limit),
+      totalPokemons: result.length,
     };
 
     res.status(200).send(data);
@@ -69,9 +71,8 @@ router.get("/", (req, res, next) => {
 // [GET] single Pokémon information together with the previous and next pokemon information.
 router.get("/:id", (req, res, next) => {
   let result = [];
+  const pokemonId = req.params.id;
   try {
-    const pokemonId = req.params.id;
-
     const targetIndex = db.pokemons.findIndex(
       (pokemon) => pokemonId === pokemon.id
     );
@@ -100,7 +101,7 @@ router.get("/:id", (req, res, next) => {
     const prevPokemon = data[prevIndex];
     const nextPokemon = data[nextIndex];
 
-    let result = {
+    result = {
       prevPokemon,
       pokemon,
       nextPokemon,
