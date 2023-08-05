@@ -1,7 +1,6 @@
 const fs = require("fs");
 var express = require("express");
 var router = express.Router();
-const { type } = require("os");
 var path = require("path");
 const { resolve } = require("path");
 let rootDir = path.resolve(__dirname);
@@ -10,26 +9,22 @@ let rootDir = path.resolve(__dirname);
 const absolutePath = resolve("./pokemon.json");
 let db = fs.readFileSync(absolutePath, "utf-8");
 db = JSON.parse(db);
-// console.log(db);
-const data = db;
-console.log(data);
+// let { data } = db;
+
 /* GET all data, filter by name, types */
 
 router.get("/", (req, res, next) => {
-  // res.send(pokemons);
   const { body, params, url, query } = req;
   console.log({ body, params, url, query });
 
   const allowedFilter = ["name", "type", "id", "search"];
   try {
     let { page, limit, ...filterQuery } = req.query;
-    console.log("filterQuery:", filterQuery);
 
     page = parseInt(page) || 1;
-    limit = parseInt(limit) || 50;
+    limit = parseInt(limit) || 10;
     //allow name,limit and page query string only
     const filterKeys = Object.keys(filterQuery);
-    // console.log("filterKeys:", filterKeys);
 
     filterKeys.forEach((key) => {
       if (!allowedFilter.includes(key)) {
@@ -40,7 +35,6 @@ router.get("/", (req, res, next) => {
       if (!filterQuery[key]) delete filterQuery[key];
     });
     // //processing logic
-
     //Number of items skip for selection
     let offset = limit * (page - 1);
 
@@ -48,20 +42,21 @@ router.get("/", (req, res, next) => {
     if (filterKeys.length) {
       if (filterQuery.type) {
         const searchQuery = filterQuery.type.toLowerCase();
-        // console.log("searchQuery:", searchQuery);
 
-        result = data.filter((pokemon) => pokemon.type.includes(searchQuery));
+        result = db.pokemons.filter((pokemon) =>
+          pokemon.types.includes(searchQuery)
+        );
       }
       if (filterQuery.search) {
         let searchQuery = filterQuery.search.toLowerCase();
-        // console.log("searchQuery type", typeof searchQuery);
-        result = data.filter((pokemon) => {
+        result = db.pokemons.filter((pokemon) => {
           return pokemon.name.includes(searchQuery);
         });
       }
     } else {
-      result = data;
+      result = db.pokemons;
     }
+
     // then select number of result by offset
     result = result.slice(offset, offset + limit);
     //send response
@@ -75,10 +70,13 @@ router.get("/", (req, res, next) => {
 router.get("/:id", (req, res, next) => {
   try {
     const pokemonId = req.params.id;
-    // console.log("pokemonId", pokemonId);
-    const targetIndex = data.findIndex((pokemon) => pokemonId === pokemon.id);
+
+    const targetIndex = db.pokemons.findIndex(
+      (pokemon) => pokemonId === pokemon.id
+    );
 
     console.log("targetId", targetIndex);
+    console.log("pokemonId", pokemonId);
 
     if (targetIndex < 0) {
       const error = new Error("Pokemon not found");
@@ -86,7 +84,7 @@ router.get("/:id", (req, res, next) => {
       throw error;
     }
 
-    const lastIndex = data.length - 1;
+    const lastIndex = db.pokemons.length - 1;
     let prevIndex = targetIndex - 1;
     let nextIndex = targetIndex + 1;
 
@@ -96,7 +94,7 @@ router.get("/:id", (req, res, next) => {
     if (targetIndex === 0) {
       prevIndex = lastIndex;
     }
-
+    let data = db.pokemons;
     const pokemon = data[targetIndex];
     const prevPokemon = data[prevIndex];
     const nextPokemon = data[nextIndex];
@@ -113,10 +111,9 @@ router.get("/:id", (req, res, next) => {
 });
 
 // [POST] creating new Pokémon
-router.post(`/`, function (req, res, next) {
+router.post("/", function (req, res, next) {
   try {
     const { name, types, id, url } = req.body;
-    console.log({ name, types, id, url });
 
     if (!name || !types) {
       const error = new Error("Missing body info");
@@ -130,15 +127,13 @@ router.post(`/`, function (req, res, next) {
     }
 
     const allTypes = [];
-    data.forEach((pokemon) => allTypes.push(...pokemon.types));
-    console.log(allTypes);
-    console.log("types", types);
+    db.pokemons.forEach((pokemon) => allTypes.push(...pokemon.types));
     if (!types.every((element) => allTypes.includes(element))) {
       const error = new Error("Pokémon's type is invalid.");
       error.statusCode = 400;
       throw error;
     }
-    data.forEach((pokemon) => {
+    db.pokemons.forEach((pokemon) => {
       if (name === pokemon.name || id === pokemon.id) {
         const error = new Error("The Pokémon already exists.");
         error.statusCode = 400;
@@ -148,13 +143,13 @@ router.post(`/`, function (req, res, next) {
     const newPokemon = {
       name,
       types,
-      id: id || (data.length + 1).toString(),
+      id: (id || db.length + 1).toString(),
       url: url,
     };
 
-    db.data.push(newPokemon);
+    db.pokemons.push(newPokemon);
 
-    fs.writeFileSync(absolutePath, JSON.stringify(db));
+    fs.writeFileSync(absolutePath, JSON.stringify(db.pokemons));
 
     res.status(200).send(newPokemon);
   } catch (error) {
@@ -174,6 +169,8 @@ router.put("/:id", function (req, res, next) {
     //find update request that not allow
     const notAllow = updateKeys.filter((el) => !allowUpdate.includes(el));
 
+    console.log("updates fields ", updates);
+
     if (notAllow.length) {
       const error = new Error(`Update field not allow`);
       error.statusCode = 400;
@@ -182,7 +179,11 @@ router.put("/:id", function (req, res, next) {
 
     //put processing
     //find pokemon by id
+    let data = db.pokemons;
+
     const targetIndex = data.findIndex((pokemon) => pokemon.id === pokemonId);
+
+    console.log("targetIndex", targetIndex);
 
     if (targetIndex < 0) {
       const error = new Error(`Pokemon not found`);
@@ -191,10 +192,11 @@ router.put("/:id", function (req, res, next) {
     }
 
     //Update new content to db JS object
-    const updatedPokemon = { ...db.data[targetIndex], ...updates };
+    const updatedPokemon = { ...db.pokemons[targetIndex], ...updates };
 
+    console.log("updatedPokemon", updatedPokemon);
     //write and save to pokemon.json
-    fs.writeFileSync("pokemon.json", JSON.stringify(db));
+    fs.writeFileSync(absolutePath, JSON.stringify(db));
 
     //put send response
     res.status(200).send(updatedPokemon);
@@ -208,7 +210,7 @@ router.delete("/:id", function (req, res, next) {
   try {
     const pokemonId = req.params.id;
 
-    const targetIndex = db.data.findIndex(
+    const targetIndex = db.pokemons.findIndex(
       (pokemon) => pokemon.id === pokemonId
     );
 
@@ -220,9 +222,9 @@ router.delete("/:id", function (req, res, next) {
     console.log(pokemonId);
     console.log(targetIndex);
 
-    db.data = db.data.filter((pokemon) => pokemon.id !== pokemonId);
+    db.pokemons = db.pokemons.filter((pokemon) => pokemon.id !== pokemonId);
 
-    fs.writeFileSync("pokemon.json", JSON.stringify(db));
+    fs.writeFileSync(absolutePath, JSON.stringify(db));
 
     res.status(200).send({});
   } catch (error) {
