@@ -2,7 +2,7 @@ const fs = require("fs");
 const csv = require("csvtojson");
 
 const createPokemon = async () => {
-  const img = fs.readdirSync("./images");
+  const img = fs.readdirSync("./public/images");
 
   let newData = await csv().fromFile("pokemon.csv");
 
@@ -22,7 +22,7 @@ const createPokemon = async () => {
         types: [e.Type1, e.Type2]
           .filter(Boolean)
           .map((type) => type.toLowerCase()),
-        url: `https://localhost:3000/images/${e.Name}.png`,
+        url: `http://localhost:8000/images/${e.Name}.png`,
       };
     })
     .filter((e) => e.name);
