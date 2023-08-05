@@ -38,26 +38,23 @@ router.get("/", (req, res, next) => {
     //Number of items skip for selection
     let offset = limit * (page - 1);
 
-    let result = [];
     if (filterKeys.length) {
       if (filterQuery.type) {
         const searchQuery = filterQuery.type.toLowerCase();
 
-        result = db.pokemons.filter((pokemon) =>
-          pokemon.types.includes(searchQuery)
-        );
+        db.pokemons = db.pokemons.filter((pokemon) => {
+          return pokemon.types.includes(searchQuery);
+        });
       }
       if (filterQuery.search) {
         let searchQuery = filterQuery.search.toLowerCase();
-        result = db.pokemons.filter((pokemon) => {
+        db.pokemons = db.pokemons.filter((pokemon) => {
           return pokemon.name.includes(searchQuery);
         });
       }
     }
 
-    let start = page === 1 ? page - 1 : page * limit - limit;
-    let end = page * limit;
-    data = db.pokemons.slice(start, end);
+    data = db.pokemons.slice(offset, offset + limit);
     res.status(200).send({ data });
   } catch (error) {
     next(error);
@@ -66,6 +63,7 @@ router.get("/", (req, res, next) => {
 
 // [GET] single Pokémon information together with the previous and next pokemon information.
 router.get("/:id", (req, res, next) => {
+  let result = [];
   try {
     const pokemonId = req.params.id;
 
