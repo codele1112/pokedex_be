@@ -53,14 +53,12 @@ router.get("/", (req, res, next) => {
           return pokemon.name.includes(searchQuery);
         });
       }
-    } else {
-      result = db.pokemons;
     }
 
-    // then select number of result by offset
-    result = result.slice(offset, offset + limit);
-    //send response
-    res.status(200).send(result);
+    let start = page === 1 ? page - 1 : page * limit - limit;
+    let end = page * limit;
+    data = db.pokemons.slice(start, end);
+    res.status(200).send({ data });
   } catch (error) {
     next(error);
   }
