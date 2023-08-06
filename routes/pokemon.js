@@ -10,7 +10,7 @@ const absolutePath = resolve("./pokemon.json");
 let db = fs.readFileSync(absolutePath, "utf-8");
 db = JSON.parse(db);
 // let { data } = db;
-console.log("data db", db.pokemons);
+// console.log("data db", db.pokemons);
 
 /* GET all data, filter by name, types */
 var data = {};
@@ -100,7 +100,7 @@ router.get("/:id", (req, res, next) => {
     const pokemon = data[targetIndex];
     const previousPokemon = data[previousIndex];
     const nextPokemon = data[nextIndex];
-
+    console.log("index:", previousPokemon, pokemon, nextPokemon);
     result = {
       previousPokemon,
       pokemon,
@@ -171,7 +171,7 @@ router.put("/:id", function (req, res, next) {
     //find update request that not allow
     const notAllow = updateKeys.filter((el) => !allowUpdate.includes(el));
 
-    console.log("updates fields ", updates);
+    // console.log("updates fields ", updates);
 
     if (notAllow.length) {
       const error = new Error(`Update field not allow`);
@@ -196,7 +196,7 @@ router.put("/:id", function (req, res, next) {
     //Update new content to db JS object
     const updatedPokemon = { ...db.pokemons[targetIndex], ...updates };
 
-    console.log("updatedPokemon", updatedPokemon);
+    // console.log("updatedPokemon", updatedPokemon);
     //write and save to pokemon.json
     fs.writeFileSync(absolutePath, JSON.stringify(db));
 
