@@ -90,17 +90,19 @@ router.get("/:id", (req, res, next) => {
     let previousIndex = targetIndex - 1;
     let nextIndex = targetIndex + 1;
 
+    console.log(lastIndex, previousIndex, nextIndex);
     if (targetIndex === lastIndex) {
       nextIndex = 0;
     }
     if (targetIndex === 0) {
-      prevIndex = lastIndex;
+      previousIndex = lastIndex;
     }
     let data = db.pokemons;
     const pokemon = data[targetIndex];
     const previousPokemon = data[previousIndex];
     const nextPokemon = data[nextIndex];
     console.log("index:", previousPokemon, pokemon, nextPokemon);
+
     result = {
       previousPokemon,
       pokemon,
