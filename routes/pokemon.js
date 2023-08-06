@@ -48,8 +48,10 @@ router.get("/", (req, res, next) => {
       }
       if (filterQuery.search) {
         let searchQuery = filterQuery.search.toLowerCase();
-        result = db.pokemons.filter((pokemon) =>
-          pokemon.name.includes(searchQuery)
+        result = db.pokemons.filter(
+          (pokemon) =>
+            pokemon.name.includes(searchQuery) ||
+            pokemon.id.includes(searchQuery)
         );
       }
     } else {
@@ -101,7 +103,6 @@ router.get("/:id", (req, res, next) => {
     const pokemon = data[targetIndex];
     const previousPokemon = data[previousIndex];
     const nextPokemon = data[nextIndex];
-    console.log("index:", previousPokemon, pokemon, nextPokemon);
 
     result = {
       previousPokemon,
